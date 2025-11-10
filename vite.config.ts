@@ -2,32 +2,26 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   server: {
     host: "::",
     port: 8080,
   },
   plugins: [react()],
-
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-
   build: {
-    // ✅ Increase warning limit to avoid chunk size warnings
-    chunkSizeWarningLimit: 1200,
+    // 🚀 Increase chunk size limit to remove warnings
+    chunkSizeWarningLimit: 2000, // 2 MB
 
-    // ✅ Minify the code for smaller bundle size
+    // ✅ Optional optimizations
     minify: "esbuild",
-
-    // ✅ Optional: optimize Rollup output
     rollupOptions: {
       output: {
         manualChunks: {
-          // Splits vendor libraries into separate chunks
           vendor: ["react", "react-dom"],
         },
       },
