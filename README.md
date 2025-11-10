@@ -1,44 +1,42 @@
-# 💳 Secure Card
+# 💳 Secure Card — Credit/Debit Card Fraud Detection Website
 
-A modern, responsive web application built using **Vite**, **TypeScript**, **HTML**, **CSS**, and **JavaScript**, designed to provide a secure and seamless card management experience.
+**Secure Card** is an intelligent and user-friendly web application built to detect potential **credit or debit card frauds** in real-time using modern web technologies.  
+Developed with **Vite + TypeScript + HTML + CSS + JavaScript**, it provides secure data input, visual analysis, and interactive dashboards for better fraud prevention insights.
+
+🔗 **Live Demo:** [https://secure-card.vercel.app](https://secure-card.vercel.app)
 
 ---
 
 ## 🚀 Features
 
-- 🔐 Secure card input with live preview  
-- 💡 Clean, minimal user interface  
-- ⚡ Built with Vite for fast performance  
-- 🧩 Responsive design for mobile and desktop  
-- 🛠️ TypeScript for better code reliability  
+- 🔐 **Fraud Detection Algorithm** — Detects unusual or suspicious transactions  
+- 📊 **Data Visualization** — Shows fraud probability, risk score, and trends  
+- 💳 **Secure Form Handling** — Protects sensitive input using client-side validation  
+- ⚡ **Fast Performance** — Built with Vite for superfast load times  
+- 🎨 **Responsive Design** — Works smoothly on desktop and mobile  
+- 🧠 **AI/ML Ready** — Can be integrated with Python ML backend for advanced detection  
 
 ---
 
 ## 🧰 Tech Stack
 
-- **Frontend:** Vite + TypeScript + HTML + CSS + JavaScript  
-- **Build Tool:** Vite  
-- **Deployment:** Vercel  
+| Category | Technologies Used |
+|-----------|-------------------|
+| **Frontend** | TypeScript, HTML, CSS, JavaScript |
+| **Build Tool** | Vite |
+| **Styling** | CSS3, Flexbox, Animations |
+| **Deployment** | Vercel |
 
 ---
 
-## 🖥️ Live Demo
+## 🖥️ Live Preview
 
-👉 [Click here to view](https://secure-card-git-main-amit-kumars-projects-7f412b29.vercel.app/)
+👉 [**Click here to open the live site**](https://secure-card.vercel.app)
 
 ---
 
-## 🧾 How to Run Locally
+## 🧾 Installation & Usage
 
+### 🔹 Clone the Repository
 ```bash
-# Clone this repository
 git clone https://github.com/Amit-kumar420/Secure-Card.git
-
-# Move into project directory
-cd Secure-Card
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
