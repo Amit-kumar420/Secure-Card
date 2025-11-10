@@ -8,12 +8,29 @@ export default defineConfig({
     host: "::",
     port: 8080,
   },
-  plugins: [
-    react(),
-  ],
+  plugins: [react()],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+
+  build: {
+    // ✅ Increase warning limit to avoid chunk size warnings
+    chunkSizeWarningLimit: 1200,
+
+    // ✅ Minify the code for smaller bundle size
+    minify: "esbuild",
+
+    // ✅ Optional: optimize Rollup output
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Splits vendor libraries into separate chunks
+          vendor: ["react", "react-dom"],
+        },
+      },
     },
   },
 });
