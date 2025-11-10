@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to your OnSpace project
 
 ## How can I edit this code?
@@ -59,3 +60,6 @@ This project is built with:
 ## How can I deploy this project?
 
 Simply open [OnSpace]() and click on Share -> Publish.
+=======
+# Secure-Card
+>>>>>>> 37cccb72d257ca9b9a15b1f7ec17963a1901d012
