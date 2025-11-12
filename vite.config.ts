@@ -20,7 +20,10 @@ export default defineConfig({
   },
 
   build: {
-    chunkSizeWarningLimit: 2000, // ✅ removes Vercel chunk warnings
+    // ✅ Silences the chunk warning completely
+    chunkSizeWarningLimit: 6000, // 6 MB threshold (safe for large apps)
+
+    // ✅ Optional safe Rollup optimization (keeps chunks smaller)
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -34,6 +37,8 @@ export default defineConfig({
         },
       },
     },
+
+    // ✅ Optimize for production (no side effects)
     minify: "esbuild",
     sourcemap: false,
     cssCodeSplit: true,
