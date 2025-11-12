@@ -9,7 +9,9 @@ export default defineConfig({
     port: 8080,
   },
 
-  plugins: [react()], // ✅ required for React + Fast Refresh
+  plugins: [
+    react(), // ✅ required for React + Fast Refresh
+  ],
 
   resolve: {
     alias: {
@@ -41,4 +43,5 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
   },
+});
 });
