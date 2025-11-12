@@ -3,15 +3,13 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  base: "./", // ✅ ensures correct asset paths for Vercel
+  base: "./",
   server: {
     host: "::",
     port: 8080,
   },
 
-  plugins: [
-    react(), // ✅ React support (JSX + Fast Refresh)
-  ],
+  plugins: [react()],
 
   resolve: {
     alias: {
@@ -20,7 +18,8 @@ export default defineConfig({
   },
 
   build: {
-    // ✅ Fix "chunk size limit" warning safely
-    chunkSizeWarningLimit: 2500, // 2.5 MB limit — increase to silence warnings
+    // ✅ This silences the warning completely
+    chunkSizeWarningLimit: 6000,
   },
 });
+
