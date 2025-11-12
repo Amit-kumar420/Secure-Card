@@ -47,4 +47,55 @@ The system uses intelligent pattern detection and visualization to flag unusual 
 ---
 
 ## 📁 Folder Structure
+Secure Card/
+├── public/ # Static assets
+├── src/ # Main application source code
+│ ├── components/ # Reusable UI components
+│ ├── pages/ # Page-level components (Login, Dashboard, etc.)
+│ ├── utils/ # Helper functions and fraud detection logic
+│ ├── styles/ # Tailwind and global CSS
+│ └── main.tsx # Application entry point
+├── .env # Environment variables (not tracked in Git)
+├── vite.config.ts # Vite configuration file
+├── tailwind.config.js # Tailwind CSS configuration
+├── package.json # Project dependencies
+└── README.md # Project documentation
 
+---
+
+## ⚙️ Installation & Setup (Local Development)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Amit-kumar420/Secure-Card.git
+   cd Secure-Card
+   ---
+
+## ✅ What You Should Do Next
+1. Open your `README.md` in VS Code.  
+2. Replace everything inside it with the above markdown.  
+3. Save → Commit → Push:
+   ```bash
+   git add README.md
+   git commit -m "Updated professional README for new version"
+   git push origin main
+
+
+🔍 Future Enhancements
+
+🧬 Integrate a real ML-based fraud detection API (Python Flask/Node backend)
+
+📈 Add transaction history analysis and user behavior profiling
+
+🛡️ Implement JWT-based authentication
+
+☁️ Deploy backend on Render or AWS Lambda for scalability
+
+
+📸 Screenshots
+
+<img width="1912" height="907" alt="Secure card 1" src="https://github.com/user-attachments/assets/77d097a1-1e7f-4f83-aa40-6c1bf2cef5e0" />
+
+<img width="1917" height="916" alt="Secure card 2" src="https://github.com/user-attachments/assets/da16e52a-c07e-45b1-99cb-cc2f6f719423" />
+
+<img width="1917" height="918" alt="Secure card 3" src="https://github.com/user-attachments/assets/3e2e2a6b-328a-4552-b422-290b7eb19a44" />
