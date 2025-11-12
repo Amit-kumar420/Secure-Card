@@ -1,61 +1,50 @@
-# Welcome to your OnSpace project
+# 💳 Secure Card — Credit/Debit Card Fraud Detection System
 
-## How can I edit this code?
+> An intelligent web-based application designed to detect and prevent fraudulent credit/debit card transactions using advanced data analytics and visualization.
 
-There are several ways of editing your application.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Framework](https://img.shields.io/badge/framework-Vite%20+%20React-blueviolet)
+![Language](https://img.shields.io/badge/language-TypeScript%2FJavaScript-yellow)
 
-**Use OnSpace**
+---
 
-Simply visit the [OnSpace Project]() and start prompting.
+## 🌐 Live Demo
 
-Changes made via OnSpace will be committed automatically to this repo.
+👉 **[https://secure-card.vercel.app](https://secure-card.vercel.app)**
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in OnSpace.
+## 🧠 Overview
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+**Secure Card** helps financial institutions and users monitor online transactions in real time and identify potential fraudulent activity.  
+The system uses intelligent pattern detection and visualization to flag unusual behaviors, helping reduce fraud risk efficiently.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Key Features
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- 🔐 **Fraud Detection Logic** — Detects suspicious transaction patterns based on defined thresholds and models.  
+- 📊 **Data Visualization** — Interactive charts and analytics dashboard to interpret fraud probabilities.  
+- ⚙️ **Responsive Design** — Fully responsive modern UI built with TailwindCSS and React.  
+- ⚡ **Fast Performance** — Built using **Vite**, optimized for minimal load time.  
+- 💾 **Secure Handling** — Uses `.env` configuration for API keys and sensitive data.  
+- 🌙 **Modern UI/UX** — Clean dark-mode-inspired interface for smooth user experience.
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🧩 Tech Stack
 
-**Edit a file directly in GitHub**
+| Category | Technologies |
+|-----------|---------------|
+| **Frontend** | React + TypeScript + Vite |
+| **Styling** | TailwindCSS |
+| **Build Tool** | Vite |
+| **Version Control** | Git & GitHub |
+| **Deployment** | Vercel |
+| **Linting** | ESLint |
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 📁 Folder Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [OnSpace]() and click on Share -> Publish.
