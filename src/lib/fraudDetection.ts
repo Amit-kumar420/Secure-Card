@@ -1,85 +1,353 @@
 import type { TransactionData, FraudAnalysis, RiskFactor } from '@/types/fraud';
 
-// Transaction history simulation (in real app, this would come from backend)
-const transactionHistory: Array<{ amount: number; time: Date; location: string }> = [];
+// Transaction history for velocity and pattern analysis
+let transactionHistory: Array<TransactionData & { timestamp: number }> = [];
+
+// Enhanced Luhn algorithm for card validation with issuer detection
+function validateCardNumber(cardNumber: string): { valid: boolean; issuer: string } {
+  const digits = cardNumber.replace(/\D/g, '');
+  
+  // Check length
+  if (digits.length < 13 || digits.length > 19) {
+    return { valid: false, issuer: 'unknown' };
+  }
+
+  // Detect card issuer
+  let issuer = 'unknown';
+  if (/^4/.test(digits)) issuer = 'Visa';
+  else if (/^5[1-5]/.test(digits)) issuer = 'Mastercard';
+  else if (/^3[47]/.test(digits)) issuer = 'Amex';
+  else if (/^6(?:011|5)/.test(digits)) issuer = 'Discover';
+  else if (/^35/.test(digits)) issuer = 'JCB';
+  else if (/^(?:2131|1800|35)/.test(digits)) issuer = 'JCB';
+  else if (/^62/.test(digits)) issuer = 'RuPay';
+
+  let sum = 0;
+  let isEven = false;
+
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let digit = parseInt(digits[i]);
+
+    if (isEven) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+
+    sum += digit;
+    isEven = !isEven;
+  }
+
+  return { valid: sum % 10 === 0, issuer };
+}
 
 export function analyzeTransaction(data: TransactionData): FraudAnalysis {
   const riskFactors: RiskFactor[] = [];
-  let totalRiskScore = 0;
+  let riskScore = 0;
 
-  // 1. Amount Analysis
-  const amountRisk = analyzeAmount(data.amount);
-  if (amountRisk.score > 0) {
-    riskFactors.push(amountRisk);
-    totalRiskScore += amountRisk.score;
-  }
-
-  // 2. Time Pattern Analysis
-  const timeRisk = analyzeTimePattern(data.time);
-  if (timeRisk.score > 0) {
-    riskFactors.push(timeRisk);
-    totalRiskScore += timeRisk.score;
-  }
-
-  // 3. Location Analysis
-  const locationRisk = analyzeLocation(data.location);
-  if (locationRisk.score > 0) {
-    riskFactors.push(locationRisk);
-    totalRiskScore += locationRisk.score;
-  }
-
-  // 4. Merchant Category Risk
-  const merchantRisk = analyzeMerchantCategory(data.merchantCategory);
-  if (merchantRisk.score > 0) {
-    riskFactors.push(merchantRisk);
-    totalRiskScore += merchantRisk.score;
-  }
-
-  // 5. Card Number Validation
-  const cardRisk = analyzeCardNumber(data.cardNumber);
-  if (cardRisk.score > 0) {
-    riskFactors.push(cardRisk);
-    totalRiskScore += cardRisk.score;
-  }
-
-  // 6. Velocity Check (multiple transactions in short time)
-  const velocityRisk = analyzeVelocity(data.amount, data.time);
-  if (velocityRisk.score > 0) {
-    riskFactors.push(velocityRisk);
-    totalRiskScore += velocityRisk.score;
-  }
-
-  // Add transaction to history
+  // Store transaction for velocity check
+  const currentTime = new Date(data.time).getTime();
   transactionHistory.push({
-    amount: data.amount,
-    time: new Date(data.time),
-    location: data.location,
+    ...data,
+    timestamp: currentTime,
   });
 
-  // Keep only last 10 transactions
-  if (transactionHistory.length > 10) {
-    transactionHistory.shift();
+  // Keep only last 24 hours of transactions
+  const oneDayAgo = currentTime - 24 * 60 * 60 * 1000;
+  transactionHistory = transactionHistory.filter(t => t.timestamp > oneDayAgo);
+
+  const transactionDate = new Date(data.time);
+
+  // 1. Enhanced Card Number Validation
+  const cardValidation = validateCardNumber(data.cardNumber);
+  if (!cardValidation.valid) {
+    riskFactors.push({
+      name: 'Invalid Card Number',
+      severity: 'critical',
+      score: 30,
+      description: 'Card number failed Luhn algorithm validation - potentially fake card',
+    });
+    riskScore += 30;
+  } else if (cardValidation.issuer === 'unknown') {
+    riskFactors.push({
+      name: 'Unrecognized Card Issuer',
+      severity: 'medium',
+      score: 10,
+      description: 'Card issuer could not be identified',
+    });
+    riskScore += 10;
   }
 
-  // Calculate overall risk score (0-100)
-  const overallRiskScore = Math.min(100, totalRiskScore);
+  // 2. Transaction Velocity Analysis
+  const recentTransactions = transactionHistory.filter(
+    t => currentTime - t.timestamp < 5 * 60 * 1000 // Last 5 minutes
+  );
+  
+  if (recentTransactions.length > 5) {
+    riskFactors.push({
+      name: 'High Transaction Velocity',
+      severity: 'critical',
+      score: 25,
+      description: `${recentTransactions.length} transactions in 5 minutes - possible card testing`,
+    });
+    riskScore += 25;
+  } else if (recentTransactions.length > 3) {
+    riskFactors.push({
+      name: 'Elevated Transaction Velocity',
+      severity: 'high',
+      score: 15,
+      description: `${recentTransactions.length} transactions in 5 minutes`,
+    });
+    riskScore += 15;
+  }
 
-  // Determine risk level
+  // 3. Enhanced Amount Analysis
+  if (data.amount > 200000) {
+    riskFactors.push({
+      name: 'Very High Transaction Amount',
+      severity: 'critical',
+      score: 25,
+      description: `Extremely large transaction: ₹${data.amount.toFixed(2)}`,
+    });
+    riskScore += 25;
+  } else if (data.amount > 100000) {
+    riskFactors.push({
+      name: 'High Transaction Amount',
+      severity: 'high',
+      score: 20,
+      description: `Large transaction: ₹${data.amount.toFixed(2)}`,
+    });
+    riskScore += 20;
+  } else if (data.amount > 50000) {
+    riskFactors.push({
+      name: 'Elevated Transaction Amount',
+      severity: 'medium',
+      score: 12,
+      description: `Above-average transaction: ₹${data.amount.toFixed(2)}`,
+    });
+    riskScore += 12;
+  } else if (data.amount < 50) {
+    riskFactors.push({
+      name: 'Micro Transaction',
+      severity: 'low',
+      score: 8,
+      description: 'Very small amounts often used for card testing by fraudsters',
+    });
+    riskScore += 8;
+  } else if (data.amount < 100) {
+    riskFactors.push({
+      name: 'Small Amount',
+      severity: 'low',
+      score: 4,
+      description: 'Small transactions can indicate initial fraud attempts',
+    });
+    riskScore += 4;
+  }
+
+  // 4. Enhanced Time-based Analysis
+  const transactionHour = transactionDate.getHours();
+  const transactionDay = transactionDate.getDay();
+  
+  if (transactionHour >= 2 && transactionHour < 5) {
+    riskFactors.push({
+      name: 'Very Late Night Transaction',
+      severity: 'high',
+      score: 15,
+      description: 'Transaction between 2 AM - 5 AM - highest risk hours',
+    });
+    riskScore += 15;
+  } else if (transactionHour >= 23 || transactionHour < 6) {
+    riskFactors.push({
+      name: 'Late Night Transaction',
+      severity: 'medium',
+      score: 10,
+      description: 'Transaction during unusual hours (11 PM - 6 AM)',
+    });
+    riskScore += 10;
+  }
+
+  // Weekend analysis
+  if (transactionDay === 0 || transactionDay === 6) {
+    if (data.amount > 50000) {
+      riskFactors.push({
+        name: 'Large Weekend Transaction',
+        severity: 'medium',
+        score: 8,
+        description: 'High-value transaction on weekend',
+      });
+      riskScore += 8;
+    }
+  }
+
+  // 5. Enhanced Location Risk Assessment
+  const highRiskLocations = ['russia', 'nigeria', 'ghana', 'pakistan', 'ukraine', 'belarus'];
+  const mediumRiskLocations = ['china', 'vietnam', 'indonesia', 'romania', 'bulgaria'];
+  const locationLower = data.location.toLowerCase();
+  
+  if (highRiskLocations.some(loc => locationLower.includes(loc))) {
+    riskFactors.push({
+      name: 'High-Risk Geographic Location',
+      severity: 'critical',
+      score: 25,
+      description: `Transaction from high-fraud region: ${data.location}`,
+    });
+    riskScore += 25;
+  } else if (mediumRiskLocations.some(loc => locationLower.includes(loc))) {
+    riskFactors.push({
+      name: 'Medium-Risk Geographic Location',
+      severity: 'medium',
+      score: 12,
+      description: `Transaction from elevated-risk region: ${data.location}`,
+    });
+    riskScore += 12;
+  }
+
+  // Cross-border detection
+  const previousLocation = transactionHistory.length > 1 
+    ? transactionHistory[transactionHistory.length - 2].location 
+    : null;
+  
+  if (previousLocation && previousLocation !== data.location) {
+    const timeDiff = currentTime - (transactionHistory[transactionHistory.length - 2]?.timestamp || 0);
+    const minutesDiff = timeDiff / (1000 * 60);
+    
+    if (minutesDiff < 60) {
+      riskFactors.push({
+        name: 'Impossible Travel Velocity',
+        severity: 'critical',
+        score: 30,
+        description: `Location changed from ${previousLocation} to ${data.location} in ${Math.round(minutesDiff)} minutes`,
+      });
+      riskScore += 30;
+    }
+  }
+
+  // 6. Enhanced Merchant Category Risk
+  const merchantRisks: Record<string, { score: number; reason: string }> = {
+    gas_station: { score: 18, reason: 'Gas stations are prime targets for card skimmers and cloned cards' },
+    online_shopping: { score: 14, reason: 'CNP (Card Not Present) transactions have higher fraud rates' },
+    travel: { score: 12, reason: 'Travel bookings are high-value and frequently targeted' },
+    entertainment: { score: 8, reason: 'Digital goods and subscriptions enable anonymous fraud' },
+    utilities: { score: 3, reason: 'Lower risk but still monitored' },
+  };
+
+  const merchantRisk = merchantRisks[data.merchantCategory];
+  if (merchantRisk) {
+    riskFactors.push({
+      name: 'Merchant Category Risk',
+      severity: merchantRisk.score > 12 ? 'high' : merchantRisk.score > 8 ? 'medium' : 'low',
+      score: merchantRisk.score,
+      description: merchantRisk.reason,
+    });
+    riskScore += merchantRisk.score;
+  }
+
+  // High-value + high-risk merchant combination
+  if (data.amount > 50000 && (data.merchantCategory === 'gas_station' || data.merchantCategory === 'online_shopping')) {
+    riskFactors.push({
+      name: 'High-Value High-Risk Merchant',
+      severity: 'critical',
+      score: 15,
+      description: 'Large transaction at merchant type commonly targeted by fraudsters',
+    });
+    riskScore += 15;
+  }
+
+  // 7. Cardholder Name Analysis
+  const nameParts = data.cardholderName.trim().split(/\s+/);
+  if (nameParts.length < 2) {
+    riskFactors.push({
+      name: 'Single Name Detected',
+      severity: 'low',
+      score: 5,
+      description: 'Cardholder name appears incomplete - possible data entry error or fraud',
+    });
+    riskScore += 5;
+  }
+
+  // Check for suspicious patterns in name
+  if (/test|fraud|admin|user/i.test(data.cardholderName)) {
+    riskFactors.push({
+      name: 'Suspicious Cardholder Name',
+      severity: 'critical',
+      score: 35,
+      description: 'Name contains test/fraud keywords',
+    });
+    riskScore += 35;
+  }
+
+  // 8. Statistical Anomaly Detection
+  if (transactionHistory.length > 5) {
+    const amounts = transactionHistory.map(t => t.amount);
+    const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length;
+    const stdDev = Math.sqrt(
+      amounts.map(x => Math.pow(x - avgAmount, 2)).reduce((a, b) => a + b, 0) / amounts.length
+    );
+
+    // Check if current transaction is more than 3 standard deviations from mean
+    if (Math.abs(data.amount - avgAmount) > 3 * stdDev) {
+      riskFactors.push({
+        name: 'Statistical Anomaly',
+        severity: 'high',
+        score: 18,
+        description: `Transaction amount significantly deviates from user's spending pattern`,
+      });
+      riskScore += 18;
+    }
+  }
+
+  // Determine risk level and fraud status with enhanced thresholds
   let riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  if (overallRiskScore < 25) riskLevel = 'low';
-  else if (overallRiskScore < 50) riskLevel = 'medium';
-  else if (overallRiskScore < 75) riskLevel = 'high';
-  else riskLevel = 'critical';
+  let isFraudulent = false;
 
-  // Determine if fraudulent
-  const isFraudulent = overallRiskScore >= 60;
-  const confidence = calculateConfidence(riskFactors.length, overallRiskScore);
+  if (riskScore >= 80) {
+    riskLevel = 'critical';
+    isFraudulent = true;
+  } else if (riskScore >= 60) {
+    riskLevel = 'high';
+    isFraudulent = true;
+  } else if (riskScore >= 35) {
+    riskLevel = 'medium';
+  } else {
+    riskLevel = 'low';
+  }
 
-  // Generate recommendations
-  const recommendations = generateRecommendations(riskFactors, isFraudulent);
+  // Calculate confidence score based on number of factors and their severity
+  const criticalFactors = riskFactors.filter(f => f.severity === 'critical').length;
+  const highFactors = riskFactors.filter(f => f.severity === 'high').length;
+  const baseConfidence = 65;
+  const confidenceBoost = (criticalFactors * 8) + (highFactors * 5) + (riskFactors.length * 2);
+  const confidence = Math.min(98, baseConfidence + confidenceBoost);
+
+  // Generate comprehensive recommendations
+  const recommendations: string[] = [];
+
+  if (isFraudulent) {
+    recommendations.push('🚫 DECLINE this transaction immediately - high fraud probability');
+    recommendations.push('📞 Contact cardholder urgently via verified phone number');
+    recommendations.push('🔒 Block card temporarily and issue fraud alert');
+    recommendations.push('📊 Review all recent transactions on this card');
+    recommendations.push('🔍 Check for related fraudulent patterns across accounts');
+    recommendations.push('📝 File fraud report and notify payment network');
+  } else if (riskLevel === 'high') {
+    recommendations.push('⚠️ HOLD transaction for manual review');
+    recommendations.push('🔐 Require step-up authentication (OTP + CVV)');
+    recommendations.push('📞 Attempt to contact cardholder before approval');
+    recommendations.push('👁️ Monitor next 3 transactions closely');
+  } else if (riskLevel === 'medium') {
+    recommendations.push('✋ Request additional verification (CVV/OTP)');
+    recommendations.push('🔔 Set alert for similar transaction patterns');
+    recommendations.push('📈 Monitor account activity for next 24 hours');
+    recommendations.push('💳 Consider velocity limits for this card');
+  } else {
+    recommendations.push('✅ Transaction appears legitimate - proceed normally');
+    recommendations.push('📊 Continue standard fraud monitoring');
+    recommendations.push('💚 Low risk - minimal additional action required');
+  }
 
   return {
-    overallRiskScore,
+    overallRiskScore: Math.min(100, riskScore),
     riskLevel,
     isFraudulent,
     confidence,
@@ -87,232 +355,4 @@ export function analyzeTransaction(data: TransactionData): FraudAnalysis {
     recommendations,
     timestamp: new Date().toISOString(),
   };
-}
-
-function analyzeAmount(amount: number): RiskFactor {
-  if (amount > 5000) {
-    return {
-      name: 'Unusual High Amount',
-      score: 35,
-      severity: 'critical',
-      description: `Transaction amount of ₹${amount.toFixed(2)} is significantly higher than typical patterns.`,
-    };
-  } else if (amount > 2000) {
-    return {
-      name: 'High Amount',
-      score: 20,
-      severity: 'high',
-      description: `Transaction amount of ₹${amount.toFixed(2)} is above average spending limit.`,
-    };
-  } else if (amount > 1000) {
-    return {
-      name: 'Elevated Amount',
-      score: 10,
-      severity: 'medium',
-      description: `Transaction amount of ₹${amount.toFixed(2)} is moderately high.`,
-    };
-  }
-  return { name: '', score: 0, severity: 'low', description: '' };
-}
-
-function analyzeTimePattern(timeString: string): RiskFactor {
-  const time = new Date(timeString);
-  const hours = time.getHours();
-
-  // Unusual hours: 2 AM - 5 AM
-  if (hours >= 2 && hours <= 5) {
-    return {
-      name: 'Unusual Time Pattern',
-      score: 25,
-      severity: 'high',
-      description: 'Transaction occurred during unusual hours (2 AM - 5 AM), often associated with fraudulent activity.',
-    };
-  }
-
-  // Late night: 11 PM - 2 AM
-  if (hours >= 23 || hours <= 2) {
-    return {
-      name: 'Late Night Transaction',
-      score: 12,
-      severity: 'medium',
-      description: 'Transaction occurred during late night hours, which may indicate higher risk.',
-    };
-  }
-
-  return { name: '', score: 0, severity: 'low', description: '' };
-}
-
-function analyzeLocation(location: string): RiskFactor {
-  const highRiskCountries = ['nigeria', 'russia', 'china', 'ukraine', 'romania'];
-  const locationLower = location.toLowerCase();
-
-  for (const country of highRiskCountries) {
-    if (locationLower.includes(country)) {
-      return {
-        name: 'High-Risk Location',
-        score: 30,
-        severity: 'critical',
-        description: `Transaction from ${location} is flagged as high-risk location for card fraud.`,
-      };
-    }
-  }
-
-  // International transaction (contains country that's not US)
-  if (
-    !locationLower.includes('usa') &&
-    !locationLower.includes('united states') &&
-    locationLower.match(/[a-z]{2,}/)
-  ) {
-    return {
-      name: 'International Transaction',
-      score: 15,
-      severity: 'medium',
-      description: `International transaction from ${location} requires additional verification.`,
-    };
-  }
-
-  return { name: '', score: 0, severity: 'low', description: '' };
-}
-
-function analyzeMerchantCategory(category: string): RiskFactor {
-  const highRiskCategories = ['online_shopping', 'entertainment', 'travel'];
-
-  if (highRiskCategories.includes(category)) {
-    return {
-      name: 'High-Risk Merchant Category',
-      score: 15,
-      severity: 'medium',
-      description: `${category.replace('_', ' ')} category has higher fraud rates and requires closer monitoring.`,
-    };
-  }
-
-  return { name: '', score: 0, severity: 'low', description: '' };
-}
-
-function analyzeCardNumber(cardNumber: string): RiskFactor {
-  // Remove spaces and dashes
-  const cleaned = cardNumber.replace(/[\s-]/g, '');
-
-  // Luhn algorithm check
-  if (!isValidCardNumber(cleaned)) {
-    return {
-      name: 'Invalid Card Number',
-      score: 50,
-      severity: 'critical',
-      description: 'Card number failed Luhn algorithm validation. This is likely a fraudulent or mistyped card.',
-    };
-  }
-
-  return { name: '', score: 0, severity: 'low', description: '' };
-}
-
-function isValidCardNumber(cardNumber: string): boolean {
-  if (!/^\d+$/.test(cardNumber)) return false;
-  if (cardNumber.length < 13 || cardNumber.length > 19) return false;
-
-  let sum = 0;
-  let isEven = false;
-
-  for (let i = cardNumber.length - 1; i >= 0; i--) {
-    let digit = parseInt(cardNumber[i]);
-
-    if (isEven) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-
-    sum += digit;
-    isEven = !isEven;
-  }
-
-  return sum % 10 === 0;
-}
-
-function analyzeVelocity(amount: number, timeString: string): RiskFactor {
-  const currentTime = new Date(timeString);
-  const recentTransactions = transactionHistory.filter((t) => {
-    const timeDiff = (currentTime.getTime() - t.time.getTime()) / 1000 / 60; // minutes
-    return timeDiff <= 30;
-  });
-
-  if (recentTransactions.length >= 3) {
-    return {
-      name: 'High Transaction Velocity',
-      score: 35,
-      severity: 'critical',
-      description: `${recentTransactions.length} transactions detected in the last 30 minutes. This rapid succession is highly suspicious.`,
-    };
-  } else if (recentTransactions.length >= 2) {
-    return {
-      name: 'Multiple Recent Transactions',
-      score: 20,
-      severity: 'high',
-      description: 'Multiple transactions detected in a short time period. Possible card testing or fraud.',
-    };
-  }
-
-  // Check for rapid large amounts
-  const recentTotal = recentTransactions.reduce((sum, t) => sum + t.amount, 0);
-  if (recentTotal + amount > 3000) {
-    return {
-      name: 'High Velocity Amount',
-      score: 25,
-      severity: 'high',
-      description: `Total transaction amount of ₹${(recentTotal + amount).toFixed(2)} in short time period exceeds normal patterns.`,
-    };
-  }
-
-  return { name: '', score: 0, severity: 'low', description: '' };
-}
-
-function calculateConfidence(factorCount: number, riskScore: number): number {
-  // More risk factors and higher scores = higher confidence
-  const factorConfidence = Math.min(factorCount * 15, 50);
-  const scoreConfidence = riskScore / 2;
-  return Math.min(95, factorConfidence + scoreConfidence);
-}
-
-function generateRecommendations(
-  riskFactors: RiskFactor[],
-  isFraudulent: boolean
-): string[] {
-  const recommendations: string[] = [];
-
-  if (isFraudulent) {
-    recommendations.push('⛔ BLOCK TRANSACTION - High fraud probability detected');
-    recommendations.push('Contact cardholder immediately via verified phone number');
-    recommendations.push('Flag card for additional monitoring and verification');
-  } else {
-    const hasHighRisk = riskFactors.some((f) => f.severity === 'critical' || f.severity === 'high');
-
-    if (hasHighRisk) {
-      recommendations.push('⚠️ VERIFY TRANSACTION - Request additional authentication');
-      recommendations.push('Send one-time password (OTP) to registered contact');
-      recommendations.push('Consider 3D Secure verification');
-    } else {
-      recommendations.push('✅ APPROVE TRANSACTION - Risk levels within acceptable range');
-      recommendations.push('Continue standard monitoring procedures');
-    }
-  }
-
-  // Specific recommendations based on risk factors
-  const factorNames = riskFactors.map((f) => f.name);
-
-  if (factorNames.includes('Unusual High Amount')) {
-    recommendations.push('Verify transaction with cardholder before processing');
-  }
-
-  if (factorNames.includes('High Transaction Velocity')) {
-    recommendations.push('Implement velocity limits to prevent card testing');
-  }
-
-  if (factorNames.includes('High-Risk Location')) {
-    recommendations.push('Require additional identity verification for international transactions');
-  }
-
-  if (factorNames.includes('Invalid Card Number')) {
-    recommendations.push('Reject transaction immediately - invalid card data');
-  }
-
-  return recommendations;
 }

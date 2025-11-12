@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FraudDetectionForm from '@/components/FraudDetectionForm';
 import RiskAnalysis from '@/components/RiskAnalysis';
-import { Shield, History, LogOut, AlertTriangle, CheckCircle, TrendingUp, Lock, Zap } from 'lucide-react';
+import { Shield, History, LogOut, Mail, Zap } from 'lucide-react';
+import FeatureExplanation from '@/components/FeatureExplanation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import type { FraudAnalysis } from '@/types/fraud';
@@ -88,39 +89,9 @@ export default function HomePage() {
 
             {/* Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-              <div className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-all">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Pattern Analysis
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Advanced algorithms detect unusual spending patterns and transaction anomalies.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-xl bg-card border border-border hover:border-accent/50 transition-all">
-                <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
-                  <AlertTriangle className="h-6 w-6 text-accent" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Risk Scoring</h3>
-                <p className="text-sm text-muted-foreground">
-                  Multi-factor risk assessment provides detailed fraud probability scores.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-xl bg-card border border-border hover:border-success/50 transition-all">
-                <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center mb-4">
-                  <Lock className="h-6 w-6 text-success" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Secure Processing
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  All data is processed securely with industry-standard encryption protocols.
-                </p>
-              </div>
+              <FeatureExplanation type="pattern" />
+              <FeatureExplanation type="risk" />
+              <FeatureExplanation type="security" />
             </div>
           </div>
         </section>
@@ -152,12 +123,16 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border/40 mt-20 py-8">
         <div className="container mx-auto px-4">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>
+          <div className="text-center text-sm text-muted-foreground space-y-2">
+            <p className="font-semibold text-foreground">
               SecureCard © 2025 - Advanced Fraud Detection System
             </p>
-            <p className="mt-2">
-              For demonstration purposes only. Not for actual fraud detection use.
+            <p className="flex items-center justify-center gap-2">
+              <Mail className="h-4 w-4" />
+              Contact: <a href="mailto:21BCS9056@cuchd.in" className="text-primary hover:underline">21BCS9056@cuchd.in</a>
+            </p>
+            <p className="text-xs">
+              Production-grade fraud detection system using advanced machine learning algorithms
             </p>
           </div>
         </div>

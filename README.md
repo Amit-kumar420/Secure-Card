@@ -1,42 +1,61 @@
-# 💳 Secure Card — Credit/Debit Card Fraud Detection Website
+# Welcome to your OnSpace project
 
-**Secure Card** is an intelligent and user-friendly web application built to detect potential **credit or debit card frauds** in real-time using modern web technologies.  
-Developed with **Vite + TypeScript + HTML + CSS + JavaScript**, it provides secure data input, visual analysis, and interactive dashboards for better fraud prevention insights.
+## How can I edit this code?
 
-🔗 **Live Demo:** [https://secure-card.vercel.app](https://secure-card.vercel.app)
+There are several ways of editing your application.
 
----
+**Use OnSpace**
 
-## 🚀 Features
+Simply visit the [OnSpace Project]() and start prompting.
 
-- 🔐 **Fraud Detection Algorithm** — Detects unusual or suspicious transactions  
-- 📊 **Data Visualization** — Shows fraud probability, risk score, and trends  
-- 💳 **Secure Form Handling** — Protects sensitive input using client-side validation  
-- ⚡ **Fast Performance** — Built with Vite for superfast load times  
-- 🎨 **Responsive Design** — Works smoothly on desktop and mobile  
-- 🧠 **AI/ML Ready** — Can be integrated with Python ML backend for advanced detection  
+Changes made via OnSpace will be committed automatically to this repo.
 
----
+**Use your preferred IDE**
 
-## 🧰 Tech Stack
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in OnSpace.
 
-| Category | Technologies Used |
-|-----------|-------------------|
-| **Frontend** | TypeScript, HTML, CSS, JavaScript |
-| **Build Tool** | Vite |
-| **Styling** | CSS3, Flexbox, Animations |
-| **Deployment** | Vercel |
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
----
+Follow these steps:
 
-## 🖥️ Live Preview
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-👉 [**Click here to open the live site**](https://secure-card.vercel.app)
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
----
+# Step 3: Install the necessary dependencies.
+npm i
 
-## 🧾 Installation & Usage
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
 
-### 🔹 Clone the Repository
-```bash
-git clone https://github.com/Amit-kumar420/Secure-Card.git
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [OnSpace]() and click on Share -> Publish.
