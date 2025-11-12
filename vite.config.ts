@@ -21,7 +21,7 @@ export default defineConfig({
 
   build: {
     // ✅ Silences the chunk warning completely
-    chunkSizeWarningLimit: 6000, // 6 MB threshold (safe for large apps)
+    chunkSizeWarningLimit: 6000, // 6MB threshold (safe for large apps)
 
     // ✅ Optional safe Rollup optimization (keeps chunks smaller)
     rollupOptions: {
@@ -43,4 +43,5 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
   },
+});
 });
