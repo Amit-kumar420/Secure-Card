@@ -92,6 +92,8 @@ Secure Card/
 ☁️ Deploy backend on Render or AWS Lambda for scalability
 
 
+
+
 📸 Screenshots
 
 <img width="1912" height="907" alt="Secure card 1" src="https://github.com/user-attachments/assets/77d097a1-1e7f-4f83-aa40-6c1bf2cef5e0" />
