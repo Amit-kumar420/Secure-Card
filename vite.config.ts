@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import viteCompression from "vite-plugin-compression";
 
 export default defineConfig({
   server: {
@@ -10,19 +9,8 @@ export default defineConfig({
   },
 
   plugins: [
+    // ✅ React plugin enables JSX/TSX + Fast Refresh + SWC compilation
     react(),
-
-    // ✅ Automatically compress built files (Brotli + Gzip)
-    viteCompression({
-      algorithm: "brotliCompress",
-      ext: ".br",
-      threshold: 10240, // Compress files > 10KB
-    }),
-    viteCompression({
-      algorithm: "gzip",
-      ext: ".gz",
-      threshold: 10240,
-    }),
   ],
 
   resolve: {
@@ -32,10 +20,10 @@ export default defineConfig({
   },
 
   build: {
-    // ✅ Fix "chunk size limit" warning
+    // ✅ Fix "chunk size limit" warning from Vercel
     chunkSizeWarningLimit: 2000, // 2 MB limit
 
-    // ✅ Split libraries into smaller chunks
+    // ✅ Split large libraries into smaller chunks (improves caching + load)
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -50,10 +38,10 @@ export default defineConfig({
       },
     },
 
-    // ✅ Use fast, safe minifier for smaller builds
+    // ✅ Fast, safe minification
     minify: "esbuild",
 
-    // ✅ Optimize for production
+    // ✅ Optimized output settings
     sourcemap: false,
     cssCodeSplit: true,
   },
